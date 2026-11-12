@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#34231f">
+  <title>Mercadinho da Vila | Calculadora de compras</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #34231f;
+      --muted: #79645a;
+      --paper: #fffaf1;
+      --card: #fffdf8;
+      --line: #eadbc4;
+      --tomato: #bc4937;
+      --tomato-dark: #963727;
+      --leaf: #55764d;
+      --gold: #e6b85c;
+      --shadow: 0 18px 48px #533b281a;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: ui-rounded, "Trebuchet MS", system-ui, sans-serif;
+      background:
+        radial-gradient(circle at 10% 12%, #f4dfb4 0 2px, transparent 3px) 0 0 / 34px 34px,
+        linear-gradient(145deg, #f8edda, #f5f0df 48%, #f8e6d6);
+    }
+    header { padding: 22px 24px; border-bottom: 1px solid #dfceb4; background: #fffaf1df; }
+    .topbar { max-width: 1040px; margin: auto; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .brand { display: flex; align-items: center; gap: 12px; font-weight: 900; letter-spacing: -.03em; font-size: 1.15rem; }
+    .brand-mark { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 14px 14px 14px 4px; background: var(--tomato); color: white; font-size: 1.4rem; transform: rotate(-4deg); }
+    .open-label { color: var(--leaf); font-size: .86rem; font-weight: 800; }
+    main { width: min(1040px, calc(100% - 32px)); margin: 38px auto 60px; }
+    .intro { max-width: 670px; margin: 0 auto 26px; text-align: center; }
+    .eyebrow { color: var(--tomato-dark); text-transform: uppercase; letter-spacing: .15em; font-size: .76rem; font-weight: 900; }
+    h1 { margin: 8px 0 10px; font-size: clamp(2rem, 6vw, 3.4rem); letter-spacing: -.055em; line-height: 1.05; }
+    .intro p { margin: 0; color: var(--muted); font-size: 1.05rem; }
+    .layout { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(280px, .8fr); gap: 20px; align-items: start; }
+    .panel { border: 1px solid var(--line); border-radius: 24px; background: var(--card); box-shadow: var(--shadow); }
+    .form-panel { padding: clamp(20px, 4vw, 34px); }
+    .panel-title { margin: 0 0 20px; font-size: 1.25rem; letter-spacing: -.02em; }
+    .products { display: grid; grid-template-columns: repeat(3, 1fr); gap: 11px; }
+    .product { position: relative; }
+    .product input { position: absolute; opacity: 0; pointer-events: none; }
+    .product label { display: flex; min-height: 118px; padding: 14px 10px; flex-direction: column; justify-content: center; align-items: center; gap: 5px; text-align: center; border: 1.5px solid var(--line); border-radius: 17px; cursor: pointer; background: #fffaf1; transition: .18s ease; }
+    .product label:hover { transform: translateY(-2px); border-color: #d5a46c; }
+    .product input:checked + label { border-color: var(--tomato); background: #fff0e9; box-shadow: 0 0 0 3px #bc49371a; }
+    .product input:focus-visible + label { outline: 3px solid #e6b85c; outline-offset: 3px; }
+    .emoji { font-size: 2rem; line-height: 1; }
+    .product-name { font-weight: 900; }
+    .product-price { color: var(--muted); font-size: .88rem; }
+    label.field-label { display: block; margin: 22px 0 7px; font-size: .92rem; font-weight: 850; }
+    .input-row { display: flex; align-items: center; gap: 10px; }
+    input[type="number"] { width: 100%; min-height: 50px; padding: 11px 13px; color: var(--ink); background: white; border: 1.5px solid var(--line); border-radius: 12px; font: inherit; }
+    input[type="number"]:focus { outline: 3px solid #e6b85c70; border-color: #c89951; }
+    .unit { color: var(--muted); font-weight: 800; }
+    .hint { margin: 8px 0 0; color: var(--muted); font-size: .84rem; }
+    button { width: 100%; min-height: 52px; margin-top: 22px; padding: 12px 18px; border: 0; border-radius: 13px; color: white; background: var(--tomato); font: inherit; font-weight: 900; cursor: pointer; box-shadow: 0 6px 0 var(--tomato-dark); transition: transform .12s, box-shadow .12s, background .12s; }
+    button:hover { background: var(--tomato-dark); }
+    button:active { transform: translateY(4px); box-shadow: 0 2px 0 var(--tomato-dark); }
+    button:disabled { cursor: wait; opacity: .7; }
+    .receipt-panel { padding: 24px; overflow: hidden; position: relative; }
+    .receipt-panel::before,.receipt-panel::after { content: ""; position: absolute; left: 0; right: 0; height: 8px; background: radial-gradient(circle at 8px -1px, transparent 9px, var(--card) 9.5px) 0 0 / 16px 16px repeat-x; }
+    .receipt-panel::before { top: -1px; transform: rotate(180deg); }
+    .receipt-panel::after { bottom: -1px; }
+    .receipt-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding-bottom: 14px; border-bottom: 1px dashed var(--line); }
+    .receipt-heading h2 { margin: 0; font-size: 1.2rem; }
+    .receipt-icon { font-size: 1.5rem; }
+    .receipt-body { min-height: 230px; padding: 18px 0 10px; }
+    .receipt-result { padding: 16px; border-radius: 13px; background: #f6f0e5; color: var(--ink); white-space: pre-wrap; }
+    .empty { color: var(--muted); text-align: center; padding: 38px 8px; }
+    .empty span { display: block; font-size: 2.3rem; margin-bottom: 8px; }
+    .receipt-line { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; color: var(--muted); }
+    .receipt-line strong { color: var(--ink); text-align: right; }
+    .total { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; padding: 15px 0 5px; margin-top: 10px; border-top: 1px dashed var(--line); }
+    .total strong { color: var(--tomato-dark); font-size: 1.7rem; letter-spacing: -.04em; }
+    .discount { margin-top: 12px; padding: 9px 11px; border-radius: 10px; color: #355634; background: #edf5e9; font-size: .88rem; font-weight: 800; }
+    .message { min-height: 1.5em; margin: 12px 0 0; color: var(--tomato-dark); font-size: .9rem; font-weight: 750; }
+    .fineprint { margin: 18px 0 0; color: var(--muted); font-size: .82rem; text-align: center; }
+    @media (max-width: 760px) { .layout { grid-template-columns: 1fr; } .receipt-body { min-height: 150px; } }
+    @media (max-width: 420px) { header { padding: 16px; } main { margin-top: 26px; } .products { gap: 7px; } .product label { min-height: 105px; padding: 10px 5px; } .product-name { font-size: .9rem; } .product-price { font-size: .78rem; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="topbar">
+      <div class="brand"><span class="brand-mark" aria-hidden="true">✿</span><span>Mercadinho da Vila</span></div>
+      <span class="open-label">● Aberto hoje</span>
+    </div>
+  </header>
+  <main>
+    <section class="intro" aria-labelledby="page-title">
+      <div class="eyebrow">Feirinha · fresquinho para você</div>
+      <h1 id="page-title">Monte sua compra</h1>
+      <p>Escolha o produto e a quantidade. A gente calcula o total para você.</p>
+    </section>
+    <div class="layout">
+      <section class="panel form-panel" aria-labelledby="form-title">
+        <h2 class="panel-title" id="form-title">O que vai para a sacola?</h2>
+        <form id="purchase-form">
+          <fieldset style="border:0;padding:0;margin:0">
+            <legend class="field-label" style="margin-top:0">Escolha um produto</legend>
+            <div class="products">
+              <div class="product"><input id="frango" name="produto" type="radio" value="FRANGO" required><label for="frango"><span class="emoji" aria-hidden="true">🍗</span><span class="product-name">Frango</span><span class="product-price">R$ 10/kg</span></label></div>
+              <div class="product"><input id="peru" name="produto" type="radio" value="PERU"><label for="peru"><span class="emoji" aria-hidden="true">🦃</span><span class="product-name">Peru</span><span class="product-price">R$ 18/kg</span></label></div>
+              <div class="product"><input id="chester" name="produto" type="radio" value="CHESTER"><label for="chester"><span class="emoji" aria-hidden="true">🍖</span><span class="product-name">Chester</span><span class="product-price">R$ 22/kg</span></label></div>
+            </div>
+          </fieldset>
+          <label class="field-label" for="quantidade">Quantos quilos?</label>
+          <div class="input-row"><input id="quantidade" name="quantidade" type="number" min="0.1" max="1000" step="0.1" inputmode="decimal" placeholder="Ex.: 2,5" required><span class="unit">kg</span></div>
+          <p class="hint">Compras acima de 10 kg recebem 5% de desconto.</p>
+          <button id="submit-button" type="submit">Calcular minha compra</button>
+          <p id="message" class="message" role="status" aria-live="polite"></p>
+        </form>
+      </section>
+      <aside class="panel receipt-panel" aria-labelledby="receipt-title" aria-live="polite">
+        <div class="receipt-heading"><h2 id="receipt-title">Seu recibinho</h2><span class="receipt-icon" aria-hidden="true">🧾</span></div>
+        <div id="receipt" class="receipt-body"><div class="empty"><span aria-hidden="true">🧺</span>Seu resumo aparece aqui depois do cálculo.</div></div>
+      </aside>
+    </div>
+    <p class="fineprint">Os preços e o desconto são calculados pelo sistema da loja.</p>
+  </main>
+  <script>
+    const form = document.querySelector("#purchase-form");
+    const receipt = document.querySelector("#receipt");
+    const message = document.querySelector("#message");
+    const submitButton = document.querySelector("#submit-button");
+
+    const money = value => new Intl.NumberFormat("pt-BR", {
+      style: "currency", currency: "BRL"
+    }).format(value);
+
+    form.addEventListener("submit", async event => {
+      event.preventDefault();
+      message.textContent = "";
+
+      const selected = form.querySelector('input[name="produto"]:checked');
+      const quantity = Number(document.querySelector("#quantidade").value.replace(",", "."));
+      if (!selected || !Number.isFinite(quantity) || quantity <= 0) {
+        message.textContent = "Escolha um produto e informe uma quantidade maior que zero.";
+        return;
+      }
+
+      submitButton.disabled = true;
+      submitButton.textContent = "Calculando...";
+      try {
+        const query = new URLSearchParams({ produto: selected.value, quantidade: String(quantity) });
+        const response = await fetch(`/compra?${query.toString()}`, {
+          headers: { Accept: "text/plain" }
+        });
+        const result = await response.text();
+        if (!response.ok) throw new Error(result || "A loja não conseguiu calcular a compra.");
+        if (result.toLocaleLowerCase("pt-BR").includes("inválido")) throw new Error(result);
+
+        receipt.replaceChildren();
+        const resultLine = document.createElement("div");
+        resultLine.className = "receipt-result";
+        resultLine.textContent = result;
+        receipt.append(resultLine);
+      } catch (error) {
+        message.textContent = error.message || "Não foi possível falar com a loja. Tente novamente.";
+      } finally {
+        submitButton.disabled = false;
+        submitButton.textContent = "Calcular minha compra";
+      }
+    });
+  </script>
+</body>
+</html>
