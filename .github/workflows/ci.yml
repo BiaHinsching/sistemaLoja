@@ -21,4 +21,4 @@ jobs:
           cache: maven
 
       - name: Testar e compilar
-        run: ./mvnw --batch-mode --no-transfer-progress verify
+        run: bash ./mvnw --batch-mode --no-transfer-progress verify
